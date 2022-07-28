@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 mongooes
   .connect("mongodb+srv://adit:adit@cluster0.azqba7k.mongodb.net/?retryWrites=true&w=majority", { useNewUrlParser: true })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB live");
   })
   .catch((err) => {
     console.log(err);

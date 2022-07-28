@@ -1,0 +1,197 @@
+const { User } = require("../models/User");
+const bcrypt = require("bcrypt");
+const Project = require("../models/Project");
+const Request = require("../models/Request");
+
+//rgister user in the database and return the user
+async function register(req, res) {
+  const userData = req.body;
+
+  try {
+    const user = await User.register(userData);
+
+    res.send(user);
+  } catch (error) {
+    res.json(error);
+  }
+}
+// login user and return the user use async/await
+async function login(req, res) {
+  const { email, password } = req.body;
+  try {
+    const user = await User.login(email, password);
+    if (user) {
+      const token = await user.generateAuthToken();
+      res.send({ user, token });
+    } else {
+      res.status(400).send({ message: "Invalid email or password" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+// getUser
+async function getUser(req, res) {
+  const id = req.userId;
+  try {
+    const user = await User.findById(id);
+    if (user) {
+      res.send(user);
+    } else {
+      res.status(404).send({ message: "User not found" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+// updateUser
+async function updateUser(req, res) {
+  const id = req.userId;
+  const userData = req.body;
+  try {
+    //if userdata has password, hash it
+    if (userData.password) {
+      const hash = await bcrypt.hashSync(userData.password, 10);
+      userData.password = hash;
+    }
+    const user = await User.findByIdAndUpdate(id, userData, {
+      new: true,
+      runValidators: true,
+    });
+    if (user) {
+      res.send(user);
+    } else {
+      res.status(404).send({ message: "User not found" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+//deleteUser
+async function deleteUser(req, res) {
+  const id = req.userId;
+  try {
+    const user = await User.findByIdAndDelete(id);
+    if (user) {
+      res.json({ message: "User deleted", user });
+    } else {
+      res.status(404).send({ message: "User not found" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+// sendCollaboratorRequest
+async function sendCollaboratorRequest(req, res) {
+  console.log("sendCollaboratorRequest");
+  try {
+    let userData = req.body;
+    //save request
+    const request = await Request.create(userData);
+    let data = {};
+    if (request) {
+      data.request = request;
+      data.message = "Request sent";
+    }
+    res.send(data);
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+//getAllSentRequests
+async function getAllSentRequests(req, res) {
+  const id = req.userId;
+  try {
+    const requests = await Request.find({ sender_id: id });
+    if (requests) {
+      res.send(requests);
+    } else {
+      res.status(404).send({ message: "Requests not found" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+//getAllReceivedRequests
+async function getAllReceivedRequests(req, res) {
+  const id = req.userId;
+  let user = await User.findById(id);
+  try {
+    const requests = await Request.find({ receiver_email: user.email });
+    if (requests) {
+      res.send(requests);
+    } else {
+      res.status(404).send({ message: "Requests not found" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+//acceptRequest
+async function acceptRequest(req, res) {
+  const id = req.userId;
+  const requestId = req.params.id;
+  try {
+    //accept request and add user to project
+    const request = await Request.findByIdAndUpdate(
+      requestId,
+      { status: "accepted" },
+      { new: true }
+    );
+    if (request) {
+      const project = await Project.findByIdAndUpdate(
+        request.project_id,
+        { $push: { collaborators: req.body.receiver_id } },
+        { new: true }
+      );
+      if (project) {
+        res.send(project);
+      } else {
+        res.status(404).send({ message: "Project not found" });
+      }
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+//rejectRequest
+async function rejectRequest(req, res) {
+  const id = req.userId;
+  const requestId = req.params.id;
+  try {
+    //reject request
+    const request = await Request.findByIdAndUpdate(
+      requestId,
+      { status: "rejected" },
+      { new: true }
+    );
+    if (request) {
+      res.send(request);
+    } else {
+      res.status(404).send({ message: "Request not found" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+module.exports = {
+  register,
+  login,
+  getUser,
+  updateUser,
+  deleteUser,
+  sendCollaboratorRequest,
+  getAllSentRequests,
+  getAllReceivedRequests,
+  acceptRequest,
+  rejectRequest,
+};

@@ -35,7 +35,15 @@ const UserSchema = new Schema(
     IsAdmin: {
       type: Boolean,
       default: false,
-    }
+    },
+    Image: {
+      type: String,
+      default: "https://i.imgur.com/1Q9ZQ9r.png",
+    },
+    ImageKey: {
+      type: String,
+      default: "https://i.imgur.com/1Q9ZQ9r.png",
+    },
   },
   {
     timestamps: true,

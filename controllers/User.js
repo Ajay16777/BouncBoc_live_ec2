@@ -2,17 +2,28 @@ const { User } = require("../models/User");
 const bcrypt = require("bcrypt");
 const Project = require("../models/Project");
 const Request = require("../models/Request");
+const { uploadImage, deleteFile } = require("../utils/utils");
 
 //rgister user in the database and return the user
 async function register(req, res) {
   const userData = req.body;
 
   try {
+    console.log(req.files);
+    // if req.files is not empty then upload the file and save the path in the database and save the user
+    if (req.files) {
+      let dir = `uploads/users/${userData.email}`;
+      const image = await uploadImage(req.files.image, dir);
+      userData.Image = image.Location;
+      userData.ImageKey = image.Key;
+    }
+
     const user = await User.register(userData);
 
     res.send(user);
   } catch (error) {
     res.json(error);
+    ``;
   }
 }
 // login user and return the user use async/await
@@ -56,6 +67,18 @@ async function updateUser(req, res) {
       const hash = await bcrypt.hashSync(userData.password, 10);
       userData.password = hash;
     }
+    //if req.files is not empty then upload the file and save the path in the database and save the user
+    if (req.files) {
+      //first delete the old image
+      const user = await User.findById(id);
+      let dir = `uploads/users/${user.email}`;
+      await deleteFile(user.ImageKey);
+      //then upload the new image
+      const image = await uploadImage(req.files.image, dir);
+      userData.Image = image.Location;
+      userData.ImageKey = image.Key;
+    }
+
     const user = await User.findByIdAndUpdate(id, userData, {
       new: true,
       runValidators: true,
@@ -76,6 +99,9 @@ async function deleteUser(req, res) {
   try {
     const user = await User.findByIdAndDelete(id);
     if (user) {
+      //delete user image
+      await deleteFile(user.ImageKey);
+
       res.json({ message: "User deleted", user });
     } else {
       res.status(404).send({ message: "User not found" });

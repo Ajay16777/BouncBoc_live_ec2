@@ -19,6 +19,14 @@ router.post(
 // @access  Public
 router.get("/GetAll", auth.verifyToken, ProjectController.getAllProjects);
 
+
+//download project files via key
+// @route   GET api/projects/download/:id
+// @desc    Download project files
+// @access  Public
+router.get("/Download", auth.verifyToken, ProjectController.downloadProjectFiles);
+
+
 // @route   GET api/projects/:id
 // @desc    Get a project by id
 // @access  Public
@@ -36,7 +44,15 @@ router.patch(
   "/Update/:id",
   auth.verifyToken,
   validator.verifyProjectAccess,
+  validator.updateProject,
   ProjectController.updateProjectById
+);
+
+router.patch(
+  "/tags/:id",
+  auth.verifyToken,
+  validator.verifyProjectAccess,
+  ProjectController.updateProjectTags
 );
 
 // @route   DELETE api/projects/:id
@@ -48,6 +64,18 @@ router.delete(
   validator.checkOwner,
   ProjectController.deleteProjectById
 );
+
+//delete collaborator
+// @route   DELETE api/projects/:id/collaborator/:collaborator_id
+// @desc    Delete a collaborator by id
+// @access  Public
+router.delete(
+  "/DeleteCollaborator/:id/:collaborator_id",
+  auth.verifyToken,
+  validator.verifyProjectAccess,
+  ProjectController.deleteCollaborator
+);
+
 
 
 

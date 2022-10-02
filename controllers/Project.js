@@ -1,32 +1,82 @@
 const Project = require("../models/Project");
 const { User } = require("../models/User");
+const {createVersion,downloadFile } = require("../utils/utils");
 
 //create a new project
 async function createProject(req, res) {
   let user_id = req.userId;
-
   const projectData = req.body;
-  projectData.user_id = user_id;
-  try {
-    const project = await new Project(projectData);
-    if (project) {
-      const user = await User.findByIdAndUpdate(
-        user_id,
-        {
-          $push: { project_id: project._id },
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
 
-      await project.save();
-      res.send(project);
-    }
+  try {
+ 
+
+    //create a new project
+    const project = await Project.create({
+      projectName: projectData.projectName,
+      artWork: projectData.artWork,
+      user_id: user_id,
+      collaborators: [],
+      project_comment: projectData.description,
+    });
+    let versionName = projectData.projectName + " " + "v1";
+
+    //create a new version
+    let data = {
+      project_id: project._id,
+      user_id: user_id,
+      versionName: versionName,
+      versionComment: "Initial version",
+      bounces: projectData.bounces,
+      samples: projectData.samples,
+      previousVersion_id: null,
+    };
+    const version = await createVersion(data);
+
+    //update the project with the version id
+    const projectWithVersion = await Project.findByIdAndUpdate(
+      project._id,
+      {
+        $push: { version_id: version._id },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    //update the user with the project id
+    const user = await User.findByIdAndUpdate(
+      user_id,
+      {
+        $push: { project_id: project._id },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    res.json({ message: "Project created", project, version });
+
+
+
+   
+  
   } catch (error) {
-    res.json(error);
+    console.log(error);
+    res.status(500).json({
+      message: "Something went wrong",
+    });
   }
+
+
+
+  
+
+  
+
+
+ 
 }
 
 // getAllProjects
@@ -61,6 +111,7 @@ async function updateProjectById(req, res) {
   let user_id = req.userId;
   let project_id = req.params.id;
   const projectData = req.body;
+  projectData.project_comment = projectData.description;
   try {
     const project = await Project.findByIdAndUpdate(project_id, projectData, {
       new: true,
@@ -175,6 +226,59 @@ async function deleteCollaborator(req, res) {
   }
 }
 
+// updateProjectTags
+async function updateProjectTags(req, res) {
+  let user_id = req.userId;
+  let project_id = req.params.id;
+  let tags = req.body.tags;
+  try {
+    const project = await Project.findByIdAndUpdate(
+      project_id,
+      {
+        $set: { tags: tags },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (project) {
+      res.json({ message: "Tags updated", project });
+    } else {
+      res.status(404).send({ message: "Project not found" });
+    }
+  }
+
+
+  catch (error) {
+    res.json(error);
+  }
+
+
+
+
+}
+
+// downloadProjectFiles
+async function downloadProjectFiles(req, res) {
+  let user_id = req.userId;
+  //check if user provided key of file to download
+  if(!req.body.key){
+    res.status(400).send({message: "Please provide key of file to download"})
+  }
+  let key = req.body.key;
+  try {
+   let file =  await downloadFile(key);
+    res.json({message: "File downloaded", file})
+  } catch (error) {
+    res.json(error);
+  }
+}
+
+
+
+
+
 module.exports = {
   createProject,
   getAllProjects,
@@ -183,4 +287,6 @@ module.exports = {
   deleteProjectById,
   sendCollaboratorRequest,
   deleteCollaborator,
+  updateProjectTags,
+  downloadProjectFiles,
 };

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { User } = require("../models/User");
 
 function verifyToken(req, res, next) {
   console.log("verifyToken");
@@ -14,9 +15,29 @@ function verifyToken(req, res, next) {
         .status(500)
         .send({ auth: false, message: "Failed to authenticate token." });
 
-    // if everything good, save to request for use in other routes
-    req.userId = decoded._id;
-    next();
+
+   //find user by id
+    User.findById(decoded._id)
+      .then((user) => {
+        if (!user) {
+          return res.status(404).send({
+            message: "User not found",
+          });
+        }
+        req.userId = user._id;
+        next();
+      }
+      )
+      .catch((err) => {
+        res.status(500).send({
+          message: err.message || "Something went wrong",
+        });
+      }
+      );
+
+
+
+   
   });
 }
 
@@ -32,14 +53,26 @@ function verifyAdmin(req, res, next) {
         .status(500)
         .send({ auth: false, message: "Failed to authenticate token." });
 
-    // if everything good, save to request for use in other routes
-    if (decoded.IsAdmin == true) {
-      req.userId = decoded._id;
-      req.IsAdmin = decoded.IsAdmin;
-      next();
-    } else {
-      return res.status(403).send({ auth: false, message: "Not an admin" });
-    }
+    //find user by id
+    User.findById(decoded._id)
+      .then((user) => {
+        if (!user) {
+          return res.status(404).send({
+            message: "User not found",
+          });
+        }
+        req.userId = user._id;
+        req.IsAdmin = user.isAdmin;
+        next();
+      }
+      )
+      .catch((err) => {
+        res.status(500).send({
+          message: err.message || "Something went wrong",
+        });
+      }
+      );
+      
   });
 }
 

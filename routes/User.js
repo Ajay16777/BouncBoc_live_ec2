@@ -14,11 +14,12 @@ const {
   rejectRequest,
 } = require("../controllers/User");
 const validator = require("./validators/Uservalidator");
+const { upload } = require("../utils/utils");
 
 // @route   POST api/users
 // @desc    Create a user
 // @access  Public
-router.post("/register", validator.register, register);
+router.post("/register",  validator.register, register);
 
 // @route   POST api/users/login
 // @desc    Login a user

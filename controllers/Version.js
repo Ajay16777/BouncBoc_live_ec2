@@ -6,22 +6,20 @@ const Projectvalidator = require("../routes/validators/Projectvalidator");
 //createVersion
 async function createVersion(req, res) {
   try {
-    let files = req.body.files;
-    let dir1 = req.body.dir;
-    let key = req.body.key;
+    let data = {
+      project_id: req.params.id,
+      user_id: req.userId,
+      versionName: req.body.versionName,
+      versionComment: req.body.comments,
+      bounces: req.body.bounces,
+      samples: req.body.samples,
+      previousVersion_id: req.body.previousVersion_id,
+    };
 
-    let upload_data = await Utils.uploadFiles(files, dir1, key);
-
-    let versionData = req.body;
-
-    versionData.version_file = upload_data;
-    versionData.version_comment = req.body.comments;
-    versionData.version_folder_path = key;
-
-    let version = await Version.create(versionData);
+    let version = await Utils.createVersion(data);
     if (version) {
-      //update project version_id
-      let project = await Project.findByIdAndUpdate(
+      //update the project with the version id
+      const projectWithVersion = await Project.findByIdAndUpdate(
         req.params.id,
         {
           $push: { version_id: version._id },
@@ -31,11 +29,19 @@ async function createVersion(req, res) {
           runValidators: true,
         }
       );
-
-      res.send(version);
-    } else {
-      res.status(400).send({ message: "Version not created" });
+      res.json({ message: "Version created", version });
     }
+    else
+    {
+      res.json({ message: "Version not created" });
+    }
+    
+
+
+    
+
+
+
   } catch (error) {
     res.json(error);
   }

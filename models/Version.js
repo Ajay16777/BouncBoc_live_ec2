@@ -6,7 +6,6 @@ const VersionSchema = new Schema(
     versionName: {
       type: String,
       required: true,
-      unique: true,
     },
     project_id: {
       type: Schema.Types.ObjectId,
@@ -20,37 +19,55 @@ const VersionSchema = new Schema(
     },
     version_comment: {
       type: String,
+      required: true,
     },
 
-    version_folder_path: {
-      type: String,
-    },
+    // version_folder_path: {
+    //   type: String,
+    // },
 
-    version_file: [
+    Version_Bounces: [
       {
-        File_name: {
-          type: String,
-        },
-        ETag: {
+        Etag: {
           type: String,
         },
         VersionId: {
           type: String,
         },
-
         Location: {
           type: String,
         },
-
         Key: {
           type: String,
         },
-
         Bucket: {
           type: String,
         },
       },
     ],
+
+    Version_Samples: [
+      {
+        Etag: {
+          type: String,
+        },
+        VersionId: {
+          type: String,
+        },
+        Location: {
+          type: String,
+        },
+        Key: {
+          type: String,
+        },
+        Bucket: {
+          type: String,
+        },
+      },
+    ]
+
+
+ 
   },
   {
     timestamps: true,

@@ -7,6 +7,10 @@ const ProjectSchema = new Schema(
       type: String,
       required: true,
     },
+    artWork: {
+      type: Buffer,
+      required: true,
+    },
     version_id: [
       {
         type: Schema.Types.ObjectId,
@@ -28,17 +32,15 @@ const ProjectSchema = new Schema(
       type: String,
     },
 
-
     tags: [
       {
-        name :{
+        name: {
           type: String,
         },
-        colour : {
+        colour: {
           type: String,
           default: "black",
         },
-        
       },
     ],
   },

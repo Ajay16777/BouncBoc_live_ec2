@@ -13,7 +13,7 @@ async function createProject(req, res) {
     //create a new project
     const project = await Project.create({
       projectName: projectData.projectName,
-      artWork: projectData.artWork,
+      artWork: projectData.artWork[0].data,
       user_id: user_id,
       collaborators: [],
       project_comment: projectData.description,

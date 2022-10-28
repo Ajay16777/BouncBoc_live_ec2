@@ -7,6 +7,7 @@ async function register(req, res, next) {
   try {
     // email firstName lastName artistName password are required
     const userData = req.body;
+    console.log(userData);
     // check if all fields are filled
     if (
       !userData.email ||

@@ -144,7 +144,7 @@ async function createVersion(data) {
  for (let i = 0; i < data.bounces.length; i++) {
    let bounce = data.bounces[i];
    let file = bounce.data;
-   let key = dir + "/bounces/" + bounce.name;
+   let key = dir + "/bounces/" + bounce.path;
    let data1 = await uploadFile(file, key);
     uploadBounces.push(data1);
     console.log(`bounce ${i} uploaded`);
@@ -154,7 +154,7 @@ async function createVersion(data) {
   for (let i = 0; i < data.samples.length; i++) {
     let sample = data.samples[i];
     let file = sample.data;
-    let key = dir + "/samples/" + sample.name;
+    let key = dir + "/samples/" + sample.path;
     let data2 = await uploadFile(file, key);
     uploadSamples.push(data2);
     console.log(`sample ${i} uploaded`);

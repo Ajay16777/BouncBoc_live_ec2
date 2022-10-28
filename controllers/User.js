@@ -6,6 +6,7 @@ const { uploadImage, deleteFile } = require("../utils/utils");
 
 //rgister user in the database and return the user
 async function register(req, res) {
+  console.log(req.body);
   const userData = req.body;
 
   try {

@@ -9,10 +9,10 @@ const fileUpload = require("express-fileupload");
 dotenv.config();
 
 const port = process.env.PORT || 8080;
+app.use(fileUpload());
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-app.use(fileUpload());
+app.use(express.urlencoded({ extended: true, limit: "50" }));
 
 // mongodb+srv://adit:adit@cluster0.azqba7k.mongodb.net/?retryWrites=true&w=majority
 

@@ -1,35 +1,12 @@
 const Project = require("../../models/Project");
 const { User } = require("../../models/User");
+const multiparty = require("multiparty");
 
 //create a new project
 async function createProject(req, res, next) {
   const projectData = req.body;
+  console.log("project data", projectData);
   try {
-    if (req.files) {
-      projectData.artWork = req.files.artWork.data;
-      projectData.bounces = [];
-      projectData.samples = [];
-      let bounces = req.files.bounces;
-      for (let i = 0; i < bounces.length; i++) {
-        //  {
-        //   name = bounces[i].originalname,
-        //   data = bounces[i].data,
-        //  }
-        projectData.bounces[i] = {
-          name: bounces[i].name,
-          data: bounces[i].data,
-        };
-      }
-
-      let samples = req.files.samples;
-      for (let i = 0; i < samples.length; i++) {
-        projectData.samples[i] = {
-          name: samples[i].name,
-          data: samples[i].data,
-        };
-      }
-    }
-
     if (
       !projectData.projectName ||
       !projectData.artWork ||
@@ -69,6 +46,7 @@ async function createProject(req, res, next) {
   }
 }
 
+
 //verify project access
 async function verifyProjectAccess(req, res, next) {
   const id = req.params.id;
@@ -97,6 +75,7 @@ async function verifyProjectAccess(req, res, next) {
 
 //version create
 async function createVersion(req, res, next) {
+  console.log("create version");
   const versionData = req.body;
   let project_id = req.params.id;
   if(req.params.id === undefined){
@@ -107,35 +86,37 @@ async function createVersion(req, res, next) {
   let user = await User.findById(req.userId);
   try {
     //check comments , previousVersion_id , versionName , bounces , samples , project_id
-    if(req.files){
-      versionData.bounces = [];
-      versionData.samples = [];
-      let bounces = req.files.bounces;
-      for (let i = 0; i < bounces.length; i++) {
-        //  {
-        //   name = bounces[i].originalname,
-        //   data = bounces[i].data,
-        //  }
-        versionData.bounces[i] = {
-          name: bounces[i].name,
-          data: bounces[i].data,
-        };
-      }
+    // if(req.files){
+    //   versionData.bounces = [];
+    //   versionData.samples = [];
+    //   let bounces = req.files.bounces;
+    //   for (let i = 0; i < bounces.length; i++) {
+    //     //  {
+    //     //   name = bounces[i].originalname,
+    //     //   data = bounces[i].data,
+    //     //  }
+    //     versionData.bounces[i] = {
+    //       name: bounces[i].name,
+    //       data: bounces[i].data,
+    //     };
+    //   }
 
-      let samples = req.files.samples;
-      for (let i = 0; i < samples.length; i++) {  
-        versionData.samples[i] = {
-          name: samples[i].name,
-          data: samples[i].data,
-        };
-      }
+    //   let samples = req.files.samples;
+    //   for (let i = 0; i < samples.length; i++) {  
+    //     versionData.samples[i] = {
+    //       name: samples[i].name,
+    //       data: samples[i].data,
+    //     };
+    //   }
       
       
       
     
 
 
-    }
+    // }
+
+    console.log(versionData);
 
     if (
       !versionData.comments ||
